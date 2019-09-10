@@ -9,6 +9,10 @@ router.get("/signup", (req, res) => {
   res.render("signup");
 });
 
+router.get("/login", (req, res) => {
+  res.render("login");
+});
+
 router.post("/signup", (req, res, next) => {
   //   console.log(req.body);
   const username = req.body.username;
@@ -41,6 +45,33 @@ router.post("/signup", (req, res, next) => {
           next(err);
         });
     }
+  });
+});
+
+router.post("/login", (req, res, next) => {
+  const username = req.body.username;
+  const password = req.body.password;
+
+  User.findOne({ username: username }).then(found => {
+    if (found === null) {
+      // no user in the collection has this username
+      res.render("login", { message: "Invalid credentials" });
+      return;
+    }
+    if (bcrypt.compareSync(password, found.password)) {
+      // password and hash match
+      req.session.user = found;
+      res.redirect("/");
+    } else {
+      res.render("login", { message: "Invalid credentials" });
+    }
+  });
+});
+
+router.get("/logout", (req, res, next) => {
+  req.session.destroy(err => {
+    if (err) next(err);
+    else res.redirect("/");
   });
 });
 
