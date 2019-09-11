@@ -9,20 +9,24 @@ router.get("/", (req, res, next) => {
 
 // create a middleware that checks if a user is logged in
 
-router.get("/private", (req, res) => {
-  if (req.session.user) {
-    res.render("private");
-  } else {
-    res.redirect("/login");
-  }
+const loginCheck = () => {
+  return (req, res, next) => {
+    if (req.session.user) {
+      // if user is logged in, proceed to the next function
+      next();
+    } else {
+      // else if user is not logged in, redirect to /login
+      res.redirect("/login");
+    }
+  };
+};
+
+router.get("/private", loginCheck(), (req, res) => {
+  res.render("private");
 });
 
-router.get("/profile", (req, res) => {
-  if (req.session.user) {
-    res.render("profile");
-  } else {
-    res.redirect("/login");
-  }
+router.get("/profile", loginCheck(), (req, res) => {
+  res.render("profile");
 });
 
 module.exports = router;
